@@ -3,6 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 export interface Todo {
   id: string;
@@ -19,12 +20,24 @@ interface TodoItemProps {
 }
 
 const TodoItem = ({ todo, onToggle, onDelete }: TodoItemProps) => {
+  const { toast } = useToast();
+
+  const handleToggle = () => {
+    onToggle(todo.id);
+    if (!todo.completed) {
+      toast({
+        title: "Task Completed! 🎉",
+        description: `"${todo.title}" has been marked as complete.`,
+      });
+    }
+  };
+
   return (
     <div className="todo-item flex items-center justify-between p-4 bg-card rounded-lg border mb-2">
       <div className="flex items-center space-x-4">
         <Checkbox
           checked={todo.completed}
-          onCheckedChange={() => onToggle(todo.id)}
+          onCheckedChange={handleToggle}
         />
         <div>
           <h3 className={`font-medium ${todo.completed ? "line-through text-muted-foreground" : ""}`}>
