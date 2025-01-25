@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import TodoItem, { Todo } from "@/components/TodoItem";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, SortAsc, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -13,12 +13,20 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Todos = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState<Date>();
+  const [sortBy, setSortBy] = useState<"dueDate" | "status">("dueDate");
+  const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "active">("all");
   const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -57,6 +65,27 @@ const Todos = () => {
     toast({
       title: "Deleted",
       description: "Todo removed successfully",
+    });
+  };
+
+  const getSortedAndFilteredTodos = () => {
+    let filteredTodos = [...todos];
+    
+    // Apply filter
+    if (filterStatus !== "all") {
+      filteredTodos = filteredTodos.filter(todo => 
+        filterStatus === "completed" ? todo.completed : !todo.completed
+      );
+    }
+    
+    // Apply sort
+    return filteredTodos.sort((a, b) => {
+      if (sortBy === "dueDate") {
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      } else {
+        // Sort by status (completed items at the bottom)
+        return Number(a.completed) - Number(b.completed);
+      }
     });
   };
 
@@ -110,8 +139,47 @@ const Todos = () => {
           </CardContent>
         </Card>
 
+        <div className="flex gap-2 mb-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <SortAsc className="w-4 h-4 mr-2" />
+                Sort by
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setSortBy("dueDate")}>
+                Due Date {sortBy === "dueDate" && "✓"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSortBy("status")}>
+                Status {sortBy === "status" && "✓"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                Filter
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => setFilterStatus("all")}>
+                All {filterStatus === "all" && "✓"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterStatus("active")}>
+                Active {filterStatus === "active" && "✓"}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setFilterStatus("completed")}>
+                Completed {filterStatus === "completed" && "✓"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         <div className="space-y-4">
-          {todos.map((todo) => (
+          {getSortedAndFilteredTodos().map((todo) => (
             <TodoItem
               key={todo.id}
               todo={todo}
