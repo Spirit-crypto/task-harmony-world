@@ -5,9 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import TodoItem, { Todo } from "@/components/TodoItem";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar as CalendarIcon, Plus, SortAsc, Filter } from "lucide-react";
+import { Calendar as CalendarIcon, Plus, SortAsc, Filter, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
+import { useNavigate } from "react-router-dom";
 import {
   Popover,
   PopoverContent,
@@ -28,6 +29,18 @@ const Todos = () => {
   const [sortBy, setSortBy] = useState<"dueDate" | "status">("dueDate");
   const [filterStatus, setFilterStatus] = useState<"all" | "completed" | "active">("all");
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleSignOut = () => {
+    // Clear any stored user data/tokens
+    localStorage.clear();
+    // Navigate to login page
+    navigate("/login");
+    toast({
+      title: "Signed out successfully",
+      description: "You have been logged out of your account.",
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,7 +104,17 @@ const Todos = () => {
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto relative">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleSignOut}
+          className="absolute top-0 right-0 flex items-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </Button>
+
         <Card className="mb-8">
           <CardHeader>
             <CardTitle>Add New Todo</CardTitle>

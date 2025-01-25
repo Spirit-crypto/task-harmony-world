@@ -27,7 +27,9 @@ const TodoItem = ({ todo, onToggle, onDelete }: TodoItemProps) => {
     if (!todo.completed) {
       toast({
         title: "Task Completed! 🎉",
-        description: `"${todo.title}" has been marked as complete.`,
+        description: `"${todo.title}" has been marked as complete.${
+          todo.description ? `\nDescription: ${todo.description}` : ""
+        }\nDue date: ${format(new Date(todo.dueDate), "PPP")}`,
       });
     }
   };
